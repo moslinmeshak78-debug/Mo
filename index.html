@@ -1,0 +1,471 @@
+# DisasterGuard Website
+
+Save this code as `index.html` in your GitHub repository.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DisasterGuard Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #08111f;
+  color: #edf4ff;
+}
+
+header {
+  padding: 24px;
+  background: #101d30;
+  border-bottom: 1px solid #233650;
+}
+
+header h1 {
+  margin: 0;
+  color: #40d9e8;
+}
+
+header p {
+  color: #8da2bd;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 15px 24px;
+  background: #0b1727;
+}
+
+nav a {
+  color: #edf4ff;
+  text-decoration: none;
+  padding: 10px;
+}
+
+main {
+  padding: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: #101d30;
+  border: 1px solid #233650;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.card h3 {
+  color: #40d9e8;
+}
+
+.value {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.status {
+  color: #3bd69a;
+}
+
+.warning {
+  color: #ff647c;
+}
+
+.two-columns {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 11px 18px;
+  background: #40d9e8;
+  color: #08111f;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px;
+}
+
+input {
+  padding: 10px;
+  width: 100%;
+  margin: 6px 0 12px;
+  border: 1px solid #233650;
+  border-radius: 7px;
+  background: #08111f;
+  color: white;
+}
+
+footer {
+  padding: 20px;
+  text-align: center;
+  color: #8da2bd;
+}
+
+@media (max-width: 850px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .two-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 500px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  main {
+    padding: 14px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>✦ DisasterGuard</h1>
+  <p>IoT-Based Disaster Management and Early Warning System</p>
+  <p id="connection">Connecting to ThingSpeak...</p>
+</header>
+
+<nav>
+  <a href="#dashboard">Dashboard</a>
+  <a href="#charts">Analytics</a>
+  <a href="#alerts">Alerts</a>
+  <a href="#devices">Device Control</a>
+  <a href="#settings">Settings</a>
+</nav>
+
+<main id="dashboard">
+
+  <h2>Environmental Monitoring Dashboard</h2>
+  <p>Monitor flood, smoke, and vibration conditions.</p>
+
+  <section class="grid">
+
+    <div class="card">
+      <h3>Flood Sensor</h3>
+      <div class="value" id="water">--</div>
+      <p>Analog reading (ADC)</p>
+      <p class="status" id="waterStatus">Waiting for data</p>
+    </div>
+
+    <div class="card">
+      <h3>Smoke Sensor</h3>
+      <div class="value" id="smoke">--</div>
+      <p>Analog reading (ADC)</p>
+      <p class="status" id="smokeStatus">Waiting for data</p>
+    </div>
+
+    <div class="card">
+      <h3>Vibration</h3>
+      <div class="value" id="vibration">--</div>
+      <p>MPU6050 status</p>
+      <p class="status" id="vibrationStatus">Waiting for data</p>
+    </div>
+
+    <div class="card">
+      <h3>Disaster Risk</h3>
+      <div class="value" id="risk">--</div>
+      <p id="riskStatus">Waiting for data</p>
+    </div>
+
+  </section>
+
+  <section class="two-columns">
+
+    <div class="card" id="charts">
+      <h3>Environmental Activity</h3>
+      <canvas id="sensorChart"></canvas>
+    </div>
+
+    <div class="card" id="alerts">
+      <h3>Recent Alerts</h3>
+      <div id="alertList">
+        Waiting for sensor readings...
+      </div>
+      <p id="lastUpdated">Last update: --</p>
+    </div>
+
+  </section>
+
+  <section class="card" id="devices">
+    <h3>Remote Device Control</h3>
+    <p>Control the remote indicator LED through ThingSpeak.</p>
+
+    <button onclick="controlLED(1)">LED ON</button>
+    <button onclick="controlLED(0)">LED OFF</button>
+
+    <p id="ledStatus">LED command not sent</p>
+  </section>
+
+  <section class="card" id="settings">
+    <h3>ThingSpeak Settings</h3>
+
+    <label for="channelId">Channel ID</label>
+    <input id="channelId" value="3549069">
+
+    <label for="readKey">Read API Key (if channel is private)</label>
+    <input id="readKey" type="password"
+      placeholder="Enter your read API key">
+
+    <label for="writeKey">Write API Key</label>
+    <input id="writeKey" type="password"
+      placeholder="Enter your write API key">
+
+    <button onclick="saveSettings()">Apply Settings</button>
+  </section>
+
+</main>
+
+<footer>
+  DisasterGuard | IoT Disaster Monitoring Project
+</footer>
+
+<script>
+let channel = "3549069";
+let readAPI = "";
+let writeAPI = "";
+let chart;
+
+function saveSettings() {
+  channel = document.getElementById("channelId").value.trim();
+  readAPI = document.getElementById("readKey").value.trim();
+  writeAPI = document.getElementById("writeKey").value.trim();
+
+  loadData();
+}
+
+function createChart() {
+  chart = new Chart(
+    document.getElementById("sensorChart"),
+    {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: "Flood ADC",
+            data: [],
+            borderColor: "#40d9e8",
+            tension: 0.3
+          },
+          {
+            label: "Smoke ADC",
+            data: [],
+            borderColor: "#ffca66",
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            min: 0,
+            max: 4095
+          }
+        }
+      }
+    }
+  );
+}
+
+async function loadData() {
+  const key = readAPI
+    ? "&api_key=" + encodeURIComponent(readAPI)
+    : "";
+
+  const url =
+    "https://api.thingspeak.com/channels/" +
+    encodeURIComponent(channel) +
+    "/feeds.json?results=20" + key;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Network error");
+
+    const data = await response.json();
+
+    const feeds = data.feeds.filter(feed =>
+      [1, 2, 3, 4].some(n =>
+        feed["field" + n] !== null &&
+        feed["field" + n] !== ""
+      )
+    );
+
+    if (feeds.length === 0) {
+      document.getElementById("connection").textContent =
+        "Connected, but no sensor readings are available.";
+      return;
+    }
+
+    const latest = feeds[feeds.length - 1];
+
+    const water = Number(latest.field1);
+    const smoke = Number(latest.field2);
+    const vibration = Number(latest.field3);
+    const alert = Number(latest.field4);
+
+    document.getElementById("water").textContent =
+      latest.field1 ?? "--";
+
+    document.getElementById("smoke").textContent =
+      latest.field2 ?? "--";
+
+    document.getElementById("vibration").textContent =
+      latest.field3 === undefined
+        ? "--"
+        : vibration >= 1 ? "DETECTED" : "NORMAL";
+
+    const floodWarning =
+      latest.field1 !== null &&
+      latest.field1 !== "" &&
+      water >= 2500;
+
+    const smokeWarning =
+      latest.field2 !== null &&
+      latest.field2 !== "" &&
+      smoke >= 2500;
+
+    const vibrationWarning =
+      latest.field3 !== null &&
+      latest.field3 !== "" &&
+      vibration >= 1;
+
+    const disaster =
+      floodWarning || smokeWarning ||
+      vibrationWarning || alert >= 1;
+
+    document.getElementById("waterStatus").textContent =
+      floodWarning ? "FLOOD WARNING" : "NORMAL";
+
+    document.getElementById("smokeStatus").textContent =
+      smokeWarning ? "SMOKE WARNING" : "NORMAL";
+
+    document.getElementById("vibrationStatus").textContent =
+      vibrationWarning ? "VIBRATION ALERT" : "NORMAL";
+
+    document.getElementById("risk").textContent =
+      disaster ? "HIGH" : "LOW";
+
+    document.getElementById("riskStatus").textContent =
+      disaster ? "Warning condition detected" : "No active warning";
+
+    ["waterStatus", "smokeStatus", "vibrationStatus",
+     "riskStatus"].forEach(id => {
+      document.getElementById(id).className =
+        disaster ? "warning" : "status";
+    });
+
+    document.getElementById("connection").textContent =
+      "Connected to ThingSpeak";
+
+    document.getElementById("lastUpdated").textContent =
+      "Last update: " + new Date().toLocaleTimeString();
+
+    document.getElementById("alertList").textContent =
+      disaster
+        ? "⚠ Warning: check the sensor readings."
+        : "✓ No active warning in the latest reading.";
+
+    chart.data.labels = feeds.map(feed =>
+      new Date(feed.created_at).toLocaleTimeString()
+    );
+
+    chart.data.datasets[0].data = feeds.map(feed =>
+      feed.field1 === null ? null : Number(feed.field1)
+    );
+
+    chart.data.datasets[1].data = feeds.map(feed =>
+      feed.field2 === null ? null : Number(feed.field2)
+    );
+
+    chart.update();
+
+  } catch (error) {
+    document.getElementById("connection").textContent =
+      "Unable to connect. Check your channel and API key.";
+    console.error(error);
+  }
+}
+
+async function controlLED(value) {
+  if (!writeAPI) {
+    alert("Enter your ThingSpeak Write API Key in Settings.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "https://api.thingspeak.com/update.json",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+          api_key: writeAPI,
+          field5: value
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!result.entry_id) {
+      throw new Error(
+        "Update rejected. Check your key and ThingSpeak rate limit."
+      );
+    }
+
+    document.getElementById("ledStatus").textContent =
+      value ? "LED ON command sent" : "LED OFF command sent";
+
+  } catch (error) {
+    alert(error.message || "Could not send LED command.");
+  }
+}
+
+createChart();
+loadData();
+setInterval(loadData, 20000);
+</script>
+
+</body>
+</html>
+```
+
+## ThingSpeak field setup
+
+| Field | Data |
+|---|---|
+| Field 1 | Flood sensor ADC |
+| Field 2 | Smoke sensor ADC |
+| Field 3 | Vibration status: `0` or `1` |
+| Field 4 | Disaster alert: `0` or `1` |
+| Field 5 | Remote LED command: `0` or `1` |
+
+**Note:** This website expects the ESP32 to upload sensor values to ThingSpeak. Your current ESP32 code does not upload them yet. The remote LED buttons also require ESP32 code to read Field 5 and switch the LED. Do not put real API keys directly into a public GitHub file.
